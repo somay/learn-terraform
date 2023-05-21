@@ -14,25 +14,24 @@ provider "aws" {
 }
 
 
-resource "aws_launch_configuration" "example" {
+resource "aws_launch_template" "example" {
   image_id        = "ami-0fb653ca2d3203ac1"
   instance_type   = "t2.micro"
-  security_groups = [aws_security_group.instance.id]
+  vpc_security_group_ids = [aws_security_group.instance.id]
 
-  user_data = <<-EOF
+  user_data = base64encode(<<-EOF
               #!/bin/bash
               echo "Hello, World" > index.html
               nohup busybox httpd -f -p ${var.server_port} &
               EOF
+              )
 
-  # Required when using a launch configuration with an auto scaling group.
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_autoscaling_group" "example" {
-  launch_configuration = aws_launch_configuration.example.name
+  launch_template {
+   id = aws_launch_template.example.id
+  }
   vpc_zone_identifier  = data.aws_subnets.default.ids
 
   target_group_arns = [aws_lb_target_group.asg.arn]
@@ -90,12 +89,17 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_lb_target_group" "asg" {
-  name = "terraform-asg-example"
+  name = "terraform-asg-example-${substr(uuid(),0, 3)}"
 
-  port = 80
+  port = var.server_port
   protocol = "HTTP"
 
   vpc_id = data.aws_vpc.default.id
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = ["name"]
+  }
 
   health_check {
     path = "/"
