@@ -8,7 +8,7 @@ variable "server_port" {
 variable "server_text" {
   description = "text to show visitors of the webpage"
   type = string
-  default = "Hello, World! Still use inline shell script."
+  default = "Hello, World!"
 }
 
 variable "alb_name" {

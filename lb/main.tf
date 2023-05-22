@@ -19,12 +19,10 @@ resource "aws_launch_template" "example" {
   instance_type   = "t2.micro"
   vpc_security_group_ids = [aws_security_group.instance.id]
 
-  user_data = base64encode(<<-EOF
-              #!/bin/bash
-              echo "${var.server_text}" > index.html
-              nohup busybox httpd -f -p ${var.server_port} &
-              EOF
-              )
+  user_data = base64encode(templatefile("user_data.sh", {
+    server_port = var.server_port
+    server_text = var.server_text
+  }))
 
   lifecycle {
     create_before_destroy = true
