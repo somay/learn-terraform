@@ -26,11 +26,15 @@ resource "aws_launch_template" "example" {
               EOF
               )
 
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_autoscaling_group" "example" {
   launch_template {
    id = aws_launch_template.example.id
+   version = aws_launch_template.example.latest_version
   }
   vpc_zone_identifier  = data.aws_subnets.default.ids
 
@@ -44,6 +48,15 @@ resource "aws_autoscaling_group" "example" {
     key                 = "Name"
     value               = "terraform-asg-example"
     propagate_at_launch = true
+  }
+
+  # Use instance refresh to roll out changes to the ASG
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 50
+      instance_warmup = 150
+    }
   }
 }
 

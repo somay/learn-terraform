@@ -5,6 +5,12 @@ variable "server_port" {
   default     = 8080
 }
 
+variable "server_text" {
+  description = "text to show visitors of the webpage"
+  type = string
+  default = "Hello, World!"
+}
+
 variable "alb_name" {
   description = "the name of the alb"
   type        = string
