@@ -111,7 +111,7 @@ resource "aws_lb_target_group" "asg" {
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes = ["name"]
+    ignore_changes = [name]
   }
 
   health_check {
