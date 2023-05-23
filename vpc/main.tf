@@ -68,12 +68,12 @@ resource "aws_instance" "example" {
   subnet_id = aws_subnet.main.id
   associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
-  key_name = var.deployer_key
+  key_name = data.aws_key_pair.deployer.key_name
 }
 
-variable "deployer_key" {
-  type = string
-  default = "deployer"
+# This key pair has been manually created
+data "aws_key_pair" "deployer" {
+  key_name = "deployer"
 }
 
 output "ec2_public_ip" {
